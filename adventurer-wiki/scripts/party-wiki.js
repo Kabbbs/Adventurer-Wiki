@@ -435,12 +435,15 @@ class WikiEntryEditor extends HandlebarsApplicationMixin(ApplicationV2) {
             ui.notifications.warn("Adventurer Wiki: You need file upload permissions to insert images. Ask your GM to enable this in world settings.");
             return;
           }
+          // Resolve FilePicker — global deprecated in v13, removed in v15
+          const FP = foundry.applications?.apps?.FilePicker?.implementation ?? FilePicker;
+
           // Capture the current selection range before focus leaves the editor
           const sel = window.getSelection();
           let savedRange = null;
           if (sel?.rangeCount) savedRange = sel.getRangeAt(0).cloneRange();
 
-          new FilePicker({
+          new FP({
             type: "image",
             callback: (path) => {
               // Restore caret position in the editor
@@ -700,16 +703,19 @@ class WikiDoodleEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       return;
     }
 
+    // Resolve FilePicker — global deprecated in v13, removed in v15
+    const FP = foundry.applications?.apps?.FilePicker?.implementation ?? FilePicker;
+
     const parentPath = `worlds/${game.world.id}/adventurer-wiki`;
     const folderPath = `worlds/${game.world.id}/adventurer-wiki/images`;
 
     // Ensure the directory hierarchy exists. Foundry returns an error if a
     // directory already exists, so we catch those silently. We create the
     // parent first, then the images subfolder.
-    try { await FilePicker.createDirectory("data", parentPath); } catch (e) {
+    try { await FP.createDirectory("data", parentPath); } catch (e) {
       if (!e?.message?.toLowerCase().includes("already")) console.warn("Adventurer Wiki | Could not create parent dir:", e);
     }
-    try { await FilePicker.createDirectory("data", folderPath); } catch (e) {
+    try { await FP.createDirectory("data", folderPath); } catch (e) {
       if (!e?.message?.toLowerCase().includes("already")) console.warn("Adventurer Wiki | Could not create images dir:", e);
     }
 
@@ -733,7 +739,7 @@ class WikiDoodleEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       const file     = new File([blob], filename, { type: "image/png" });
 
       try {
-        const result = await FilePicker.upload("data", folderPath, file, {});
+        const result = await FP.upload("data", folderPath, file, {});
 
         if (!result?.path) throw new Error("Upload returned no path");
 
