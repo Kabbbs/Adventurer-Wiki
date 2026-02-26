@@ -16,7 +16,7 @@ const SOCKET_EVENT = `module.${MODULE_ID}`;
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 
-const CATEGORIES = [
+const DEFAULT_CATEGORIES = [
   { id: "lore",      label: "Lore",          icon: "fa-book-open"    },
   { id: "locations", label: "Locations",     icon: "fa-map-location-dot" },
   { id: "npcs",      label: "NPCs",          icon: "fa-person"       },
@@ -25,6 +25,8 @@ const CATEGORIES = [
   { id: "items",     label: "Items",         icon: "fa-gem"          },
   { id: "notes",     label: "Session Notes", icon: "fa-scroll"       },
 ];
+
+const CATS_SETTING_KEY = "wikiCategories";
 
 // Ephemeral map of entryId → { userName, userId } for the soft-lock indicator.
 const activeEditors = new Map();
@@ -49,6 +51,13 @@ Hooks.once("init", () => {
     // in a second array (Array([...]) === [[...]]), breaking getEntries().
     default: [],
   });
+
+  game.settings.register(MODULE_ID, CATS_SETTING_KEY, {
+    name:    "Wiki Categories",
+    scope:   "world",
+    config:  false,
+    default: DEFAULT_CATEGORIES,
+  });
 });
 
 // ─── Sockets ──────────────────────────────────────────────────────────────────
@@ -70,6 +79,11 @@ Hooks.once("ready", () => {
       }
 
       case "refresh": {
+        refreshAllWikiApps();
+        break;
+      }
+
+      case "categoriesChanged": {
         refreshAllWikiApps();
         break;
       }
@@ -145,6 +159,15 @@ function getEntries() {
   // a failed save (e.g. no GM online) that pushed to the local array would
   // cause the phantom entry to appear on the next re-render.
   return foundry.utils.deepClone(game.settings.get(MODULE_ID, SETTING_KEY) || []);
+}
+
+function getCategories() {
+  try {
+    const stored = game.settings.get(MODULE_ID, CATS_SETTING_KEY);
+    return (Array.isArray(stored) && stored.length) ? stored : DEFAULT_CATEGORIES;
+  } catch {
+    return DEFAULT_CATEGORIES;
+  }
 }
 
 /**
@@ -253,7 +276,7 @@ class PartyWikiApp extends HandlebarsApplicationMixin(ApplicationV2) {
     main: { template: `modules/${MODULE_ID}/templates/wiki.html` },
   };
 
-  _activeCat     = CATEGORIES[0].id;
+  _activeCat     = DEFAULT_CATEGORIES[0].id;
   _selectedEntry = null;
   _searchQuery   = "";
 
@@ -310,7 +333,7 @@ class PartyWikiApp extends HandlebarsApplicationMixin(ApplicationV2) {
         beingEditedBy: activeEditors.get(e.id)?.userName ?? null,
         // Category badge when search results span multiple categories.
         categoryLabel: q
-          ? (CATEGORIES.find(c => c.id === e.category)?.label ?? e.category)
+          ? (cats.find(c => c.id === e.category)?.label ?? e.category)
           : null,
         bodyMatch,
       };
@@ -318,8 +341,13 @@ class PartyWikiApp extends HandlebarsApplicationMixin(ApplicationV2) {
 
     const currentEditor = current ? (activeEditors.get(current.id)?.userName ?? null) : null;
 
+    const cats = getCategories();
+    if (!cats.find(c => c.id === this._activeCat)) {
+      this._activeCat = cats[0]?.id ?? null;
+    }
+
     // Per-category counts.
-    const categoriesWithCount = CATEGORIES.map(cat => ({
+    const categoriesWithCount = cats.map(cat => ({
       ...cat,
       count: entries.filter(e => e.category === cat.id).length,
     }));
@@ -448,6 +476,12 @@ class PartyWikiApp extends HandlebarsApplicationMixin(ApplicationV2) {
       // New entry button.
       if (e.target.closest(".wiki-btn-new")) {
         new WikiEntryEditor({ category: this._activeCat }, this).render(true);
+        return;
+      }
+
+      // Settings button (GM only)
+      if (e.target.closest(".wiki-btn-settings")) {
+        new WikiCategorySettings().render(true);
         return;
       }
 
@@ -635,7 +669,7 @@ class WikiEntryEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     const entry = this._entry ?? { title: "", category: "lore", content: "" };
     return {
       entry,
-      categories: CATEGORIES,
+      categories: getCategories(),
       isNew:      !entry.id,
       isGM:       game.user.isGM,
     };
@@ -843,5 +877,191 @@ class WikiEntryEditor extends HandlebarsApplicationMixin(ApplicationV2) {
   }
 }
 
+// ─── Category Settings (GM only) ─────────────────────────────────────────────
+
+class WikiCategorySettings extends HandlebarsApplicationMixin(ApplicationV2) {
+
+  static DEFAULT_OPTIONS = {
+    id:       "party-wiki-cat-settings",
+    classes:  ["party-wiki", "party-wiki-settings"],
+    window:   { title: "Adventurer Wiki – Category Settings", resizable: false },
+    position: { width: 540, height: 520 },
+  };
+
+  static PARTS = {
+    main: { template: `modules/${MODULE_ID}/templates/category-settings.html` },
+  };
+
+  constructor(options = {}) {
+    super(options);
+    this._working = foundry.utils.deepClone(getCategories());
+  }
+
+  async _prepareContext() {
+    const entries = getEntries();
+    const categories = this._working.map((cat, idx) => ({
+      ...cat,
+      count:   entries.filter(e => e.category === cat.id).length,
+      isFirst: idx === 0,
+      isLast:  idx === this._working.length - 1,
+    }));
+    return { categories };
+  }
+
+  _onRender(_context, _options) {
+    this._attachListeners();
+  }
+
+  _attachListeners() {
+    if (this._listenersReady) return;
+    this._listenersReady = true;
+    const inApp = (e) => !!(this.element?.contains(e.target));
+
+    const _click = async (e) => {
+      if (!inApp(e)) return;
+
+      // Delete category
+      const deleteBtn = e.target.closest(".wiki-cat-delete-btn:not([disabled])");
+      if (deleteBtn) {
+        const catId = deleteBtn.dataset.catId;
+        const row   = this.element.querySelector(`.wiki-cat-row[data-id="${catId}"]`);
+        const label = row?.querySelector(".wiki-cat-label-input")?.value?.trim() ?? catId;
+        const ok = await foundry.applications.api.DialogV2.confirm({
+          window:  { title: "Delete Category" },
+          content: `<p>Remove the category "<strong>${label}</strong>"? This cannot be undone.</p>`,
+        });
+        if (!ok) return;
+        this._syncFromDOM();
+        this._working = this._working.filter(c => c.id !== catId);
+        this.render({ force: true });
+        return;
+      }
+
+      // Move up
+      const upBtn = e.target.closest(".wiki-cat-move-up");
+      if (upBtn) {
+        this._syncFromDOM();
+        const catId = upBtn.dataset.catId;
+        const idx   = this._working.findIndex(c => c.id === catId);
+        if (idx > 0) {
+          [this._working[idx - 1], this._working[idx]] = [this._working[idx], this._working[idx - 1]];
+          this.render({ force: true });
+        }
+        return;
+      }
+
+      // Move down
+      const downBtn = e.target.closest(".wiki-cat-move-down");
+      if (downBtn) {
+        this._syncFromDOM();
+        const catId = downBtn.dataset.catId;
+        const idx   = this._working.findIndex(c => c.id === catId);
+        if (idx < this._working.length - 1) {
+          [this._working[idx], this._working[idx + 1]] = [this._working[idx + 1], this._working[idx]];
+          this.render({ force: true });
+        }
+        return;
+      }
+
+      // Add category
+      if (e.target.closest(".wiki-cat-add-btn")) {
+        const labelInput = this.element.querySelector(".wiki-cat-new-label");
+        const iconInput  = this.element.querySelector(".wiki-cat-new-icon");
+        const label = labelInput?.value?.trim();
+        const icon  = iconInput?.value?.trim()  || "fa-tag";
+        if (!label) {
+          ui.notifications.warn("Adventurer Wiki: Please enter a category name.");
+          return;
+        }
+        const id = label.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "").replace(/-+/g, "-").replace(/^-|-$/g, "") || `cat-${Date.now()}`;
+        if (this._working.find(c => c.id === id)) {
+          ui.notifications.warn(`Adventurer Wiki: A category named "${label}" already exists.`);
+          return;
+        }
+        this._syncFromDOM();
+        this._working.push({ id, label, icon });
+        if (labelInput) labelInput.value = "";
+        if (iconInput)  iconInput.value  = "";
+        this.render({ force: true });
+        return;
+      }
+
+      // Save
+      if (e.target.closest(".wiki-cat-save-btn")) {
+        await this._save();
+        return;
+      }
+
+      // Cancel
+      if (e.target.closest(".wiki-cat-cancel-btn")) {
+        this.close();
+        return;
+      }
+    };
+
+    // Live icon preview
+    const _input = (e) => {
+      if (!inApp(e)) return;
+      if (e.target.matches(".wiki-cat-icon-input")) {
+        const row    = e.target.closest(".wiki-cat-row");
+        const iconEl = row?.querySelector(".wiki-cat-preview-icon");
+        if (iconEl) iconEl.className = `fas ${e.target.value.trim() || "fa-tag"} wiki-cat-preview-icon`;
+      }
+    };
+
+    document.addEventListener("click", _click, { capture: true });
+    document.addEventListener("input", _input, { capture: true });
+    this._docListeners = { _click, _input };
+  }
+
+  /** Read label/icon values from current DOM inputs into this._working. */
+  _syncFromDOM() {
+    const rows = this.element?.querySelectorAll(".wiki-cat-row") ?? [];
+    for (const row of rows) {
+      const catId = row.dataset.id;
+      const cat   = this._working.find(c => c.id === catId);
+      if (!cat) continue;
+      const label = row.querySelector(".wiki-cat-label-input")?.value?.trim();
+      const icon  = row.querySelector(".wiki-cat-icon-input")?.value?.trim();
+      if (label) cat.label = label;
+      if (icon)  cat.icon  = icon;
+    }
+  }
+
+  async _save() {
+    this._syncFromDOM();
+
+    if (this._working.length === 0) {
+      ui.notifications.warn("Adventurer Wiki: You must keep at least one category.");
+      return;
+    }
+
+    for (const cat of this._working) {
+      if (!cat.label?.trim()) {
+        ui.notifications.warn("Adventurer Wiki: All categories must have a name.");
+        return;
+      }
+    }
+
+    await game.settings.set(MODULE_ID, CATS_SETTING_KEY, this._working);
+    game.socket.emit(SOCKET_EVENT, { action: "categoriesChanged" });
+    refreshAllWikiApps();
+    ui.notifications.info("Adventurer Wiki: Categories saved.");
+    this.close();
+  }
+
+  async close(options) {
+    if (this._docListeners) {
+      const { _click, _input } = this._docListeners;
+      document.removeEventListener("click", _click, { capture: true });
+      document.removeEventListener("input", _input, { capture: true });
+      this._docListeners   = null;
+      this._listenersReady = false;
+    }
+    return super.close(options);
+  }
+}
+
 // ─── Global exposure (for macros) ─────────────────────────────────────────────
 globalThis.AdventurerWikiApp = PartyWikiApp;
+
