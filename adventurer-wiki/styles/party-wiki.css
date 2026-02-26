@@ -1,0 +1,1199 @@
+/* ── Adventurer Wiki — D&D Dark Theme ───────────────────────────────── */
+/*
+ * Palette:
+ *   Background deep:   #0a0a0a
+ *   Background mid:    #141414
+ *   Background light:  #1e1e1e
+ *   Surface:           #252525
+ *   Border subtle:     #2e2e2e
+ *   Border strong:     #444444
+ *   Accent red:        #8b1a1a  (dark crimson)
+ *   Accent red bright: #c0392b  (crimson)
+ *   Accent red glow:   #e74c3c  (highlight)
+ *   Text primary:      #e8e8e8
+ *   Text muted:        #888888
+ *   Text dim:          #555555
+ */
+
+/* ── Scene Controls Button ───────────────────────────────────────────── */
+
+.party-wiki-control-btn {
+  cursor: pointer;
+}
+.party-wiki-control-btn:hover i {
+  color: #e74c3c !important;
+}
+
+/* ── Window Shell ────────────────────────────────────────────────────── */
+
+.party-wiki .window-content {
+  padding: 0;
+  overflow: hidden;
+  background: #141414;
+  color: #e8e8e8;
+  font-family: "Palatino Linotype", Palatino, "Book Antiqua", serif;
+}
+
+.party-wiki .window-header {
+  background: #0a0a0a;
+  border-bottom: 2px solid #8b1a1a;
+}
+
+/* ── Layout ──────────────────────────────────────────────────────────── */
+
+.wiki-layout {
+  display: flex;
+  height: 100%;
+}
+
+/* ── Sidebar ─────────────────────────────────────────────────────────── */
+
+.wiki-sidebar {
+  width: 220px;
+  min-width: 180px;
+  background: #0f0f0f;
+  border-right: 2px solid #8b1a1a;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+}
+
+/* Search */
+.wiki-search-wrap {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 10px 8px;
+  border-bottom: 1px solid #2e2e2e;
+}
+
+.wiki-search-wrap i {
+  color: #8b1a1a;
+}
+
+.wiki-search {
+  flex: 1;
+  background: #1e1e1e;
+  border: 1px solid #333;
+  border-radius: 3px;
+  color: #e8e8e8;
+  padding: 4px 7px;
+  font-family: inherit;
+  font-size: 0.85rem;
+}
+
+.wiki-search:focus {
+  outline: none;
+  border-color: #c0392b;
+  box-shadow: 0 0 0 1px #8b1a1a;
+}
+
+/* Category tabs */
+.wiki-cats {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px 6px;
+  border-bottom: 1px solid #2e2e2e;
+}
+
+.wiki-cat-tab {
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 3px;
+  color: #888888;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.85rem;
+  padding: 5px 8px;
+  text-align: left;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  transition: all 0.15s;
+  letter-spacing: 0.02em;
+  width: 100%;
+}
+
+.wiki-cat-tab:hover {
+  background: #1e1e1e;
+  color: #e8e8e8;
+  border-color: #333;
+}
+
+.wiki-cat-tab.active {
+  background: #1a0808;
+  border-color: #8b1a1a;
+  color: #e74c3c;
+}
+
+.wiki-cat-tab-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.wiki-cat-tab i {
+  width: 14px;
+  text-align: center;
+  color: inherit;
+}
+
+/* Entry count pill on each category tab */
+.wiki-cat-count {
+  font-size: 0.7rem;
+  font-family: "Segoe UI", Arial, sans-serif;
+  min-width: 18px;
+  height: 16px;
+  padding: 0 5px;
+  border-radius: 8px;
+  background: #1e1e1e;
+  border: 1px solid #2e2e2e;
+  color: #555;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.15s;
+}
+
+.wiki-cat-tab:hover .wiki-cat-count {
+  background: #252525;
+  border-color: #3a3a3a;
+  color: #777;
+}
+
+.wiki-cat-tab.active .wiki-cat-count {
+  background: #250808;
+  border-color: #5a1a1a;
+  color: #c0392b;
+}
+
+/* Entry list */
+.wiki-entry-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 6px;
+}
+
+.wiki-entry-item {
+  padding: 6px 10px;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 0.87rem;
+  color: #aaaaaa;
+  transition: all 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-left: 2px solid transparent;
+}
+
+.wiki-entry-item-title {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.wiki-entry-item:hover {
+  background: #1e1e1e;
+  color: #e8e8e8;
+}
+
+.wiki-entry-item.selected {
+  background: #1a0808;
+  border-left: 2px solid #c0392b;
+  color: #e74c3c;
+  padding-left: 8px;
+}
+
+.wiki-empty {
+  color: #555;
+  font-size: 0.82rem;
+  padding: 10px;
+  font-style: italic;
+  text-align: center;
+}
+
+/* ── Sidebar Action Buttons ──────────────────────────────────────────── */
+
+.wiki-sidebar-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px 6px;
+  border-top: 1px solid #2e2e2e;
+}
+
+.wiki-actions-row {
+  display: flex;
+  gap: 4px;
+}
+
+.wiki-actions-row button {
+  flex: 1;
+  padding: 5px 4px;
+  font-size: 0.78rem;
+  border-radius: 3px;
+  cursor: pointer;
+  font-family: inherit;
+  border: 1px solid;
+  transition: all 0.15s;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* New */
+.wiki-btn-new {
+  background: #141414;
+  border-color: #444 !important;
+  color: #aaaaaa;
+}
+.wiki-btn-new:hover {
+  background: #1e1e1e;
+  border-color: #c0392b !important;
+  color: #e8e8e8;
+}
+
+/* Edit */
+.wiki-btn-edit {
+  background: #141414;
+  border-color: #444 !important;
+  color: #aaaaaa;
+}
+.wiki-btn-edit:hover:not(:disabled) {
+  background: #1e1e1e;
+  border-color: #c0392b !important;
+  color: #e8e8e8;
+}
+
+/* GM Delete */
+.wiki-btn-delete {
+  background: #1a0808;
+  border-color: #8b1a1a !important;
+  color: #c0392b;
+}
+.wiki-btn-delete:hover:not(:disabled) {
+  background: #250a0a;
+  border-color: #c0392b !important;
+  color: #e74c3c;
+}
+
+/* Player Flag */
+.wiki-btn-request-delete {
+  background: #141414;
+  border-color: #444 !important;
+  color: #888;
+}
+.wiki-btn-request-delete:hover:not(:disabled) {
+  background: #1a0808;
+  border-color: #8b1a1a !important;
+  color: #c0392b;
+}
+
+/* GM Clear Flag */
+.wiki-btn-cancel-delete {
+  background: #141414;
+  border-color: #444 !important;
+  color: #888;
+}
+.wiki-btn-cancel-delete:hover:not(:disabled) {
+  background: #1e1e1e;
+  border-color: #555 !important;
+  color: #e8e8e8;
+}
+
+.wiki-sidebar-actions button:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+/* ── Search category badge ───────────────────────────────────────────── */
+
+/* Wrapper that holds the category badge + edit badge together */
+.wiki-entry-item-badges {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+  margin-left: 6px;
+}
+
+/* Shown when search results span multiple categories */
+.wiki-entry-cat-badge {
+  font-size: 0.65rem;
+  color: #666;
+  background: #1e1e1e;
+  border: 1px solid #2e2e2e;
+  border-radius: 3px;
+  padding: 1px 5px;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+}
+
+.wiki-entry-item.selected .wiki-entry-cat-badge {
+  color: #8b1a1a;
+  background: #0f0608;
+  border-color: #3a1010;
+}
+
+/* ── Live Editing Indicator ──────────────────────────────────────────── */
+
+.wiki-editing-badge {
+  flex-shrink: 0;
+  font-size: 0.68rem;
+  color: #c0392b;
+  opacity: 0.9;
+  animation: wiki-pulse 2s ease-in-out infinite;
+}
+
+@keyframes wiki-pulse {
+  0%, 100% { opacity: 0.6; }
+  50%       { opacity: 1;   }
+}
+
+.wiki-editing-notice {
+  background: #1a0808;
+  border: 1px solid #8b1a1a;
+  border-left: 3px solid #c0392b;
+  border-radius: 3px;
+  color: #c0392b;
+  font-size: 0.84rem;
+  padding: 7px 12px;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ── Pending Deletion ────────────────────────────────────────────────── */
+
+.wiki-entry-item.pending-delete {
+  color: #666;
+  font-style: italic;
+}
+.wiki-entry-item.pending-delete.selected {
+  background: #1a0808;
+  border-left-color: #8b1a1a;
+  color: #c0392b;
+}
+.wiki-pending-icon {
+  font-size: 0.72rem;
+  opacity: 0.75;
+  margin-right: 2px;
+}
+
+.wiki-pending-banner {
+  margin: 4px 6px 8px;
+  padding: 5px 9px;
+  background: #1a0808;
+  border: 1px solid #8b1a1a;
+  border-radius: 3px;
+  color: #c0392b;
+  font-size: 0.78rem;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.wiki-delete-notice {
+  background: #1a0808;
+  border: 1px solid #8b1a1a;
+  border-left: 3px solid #8b1a1a;
+  border-radius: 3px;
+  color: #888;
+  font-size: 0.84rem;
+  padding: 7px 12px;
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ── Main Content ────────────────────────────────────────────────────── */
+
+.wiki-content {
+  flex: 1;
+  padding: 22px 28px;
+  overflow-y: auto;
+  background: #141414;
+}
+
+.wiki-entry-header {
+  margin-bottom: 14px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #2e2e2e;
+  position: relative;
+}
+
+/* Thin red accent line under the header */
+.wiki-entry-header::after {
+  content: "";
+  display: block;
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  width: 48px;
+  height: 2px;
+  background: #8b1a1a;
+  border-radius: 1px;
+}
+
+.wiki-entry-title {
+  font-size: 1.55rem;
+  color: #e8e8e8;
+  margin: 0 0 5px;
+  font-weight: normal;
+  letter-spacing: 0.02em;
+}
+
+.pending-delete-title {
+  color: #555 !important;
+  text-decoration: line-through;
+}
+
+.wiki-entry-meta {
+  font-size: 0.76rem;
+  color: #555;
+  font-style: italic;
+  letter-spacing: 0.01em;
+}
+
+.wiki-entry-body {
+  font-size: 0.95rem;
+  line-height: 1.75;
+  color: #cccccc;
+}
+
+.wiki-entry-body h1,
+.wiki-entry-body h2,
+.wiki-entry-body h3 {
+  color: #e8e8e8;
+  border-bottom: 1px solid #2e2e2e;
+  padding-bottom: 4px;
+  margin-top: 1.2em;
+  font-weight: normal;
+  letter-spacing: 0.03em;
+}
+
+.wiki-entry-body h1::first-letter,
+.wiki-entry-body h2::first-letter {
+  color: #c0392b;
+}
+
+.wiki-entry-body a {
+  color: #c0392b;
+  text-decoration: none;
+  border-bottom: 1px dotted #8b1a1a;
+}
+
+.wiki-entry-body a:hover {
+  color: #e74c3c;
+}
+
+.wiki-entry-body blockquote {
+  border-left: 3px solid #8b1a1a;
+  margin: 12px 0;
+  padding: 6px 14px;
+  color: #888;
+  font-style: italic;
+  background: #0f0f0f;
+  border-radius: 0 3px 3px 0;
+}
+
+.wiki-entry-body hr {
+  border: none;
+  border-top: 1px solid #2e2e2e;
+  margin: 16px 0;
+}
+
+.wiki-entry-body strong {
+  color: #e8e8e8;
+}
+
+/* Placeholder */
+.wiki-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: #333;
+  gap: 14px;
+}
+
+.wiki-placeholder i {
+  font-size: 3rem;
+  color: #2a2a2a;
+}
+
+.wiki-placeholder p {
+  font-size: 0.9rem;
+  font-style: italic;
+  margin: 0;
+  color: #444;
+}
+
+/* ── Editor Window ───────────────────────────────────────────────────── */
+
+.party-wiki-editor .window-content {
+  padding: 16px;
+  background: #2c2c2c;
+  color: #e8e8e8;
+  font-family: "Palatino Linotype", Palatino, "Book Antiqua", serif;
+  /* Allow the form to grow and fill the full window height */
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Form fills the window; footer stays pinned at the bottom */
+.party-wiki-editor form {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.party-wiki-editor .window-header {
+  background: #1a1a1a;
+  border-bottom: 2px solid #8b1a1a;
+}
+
+.party-wiki-editor .form-group {
+  margin-bottom: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.party-wiki-editor .editor-wrap {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  min-height: 0; /* allows flex child to shrink below its natural height */
+}
+
+.party-wiki-editor .form-group label {
+  font-size: 0.75rem;
+  color: #c0392b;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.party-wiki-editor input[type="text"],
+.party-wiki-editor select {
+  background: #3a3a3a;
+  border: 1px solid #555;
+  border-radius: 3px;
+  color: #e8e8e8;
+  padding: 6px 9px;
+  font-family: inherit;
+  font-size: 0.9rem;
+}
+
+.party-wiki-editor input:focus,
+.party-wiki-editor select:focus {
+  outline: none;
+  border-color: #c0392b;
+  box-shadow: 0 0 0 1px #8b1a1a;
+}
+
+/* ── Formatting toolbar ──────────────────────────────────────────────── */
+
+.wiki-toolbar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 2px;
+  padding: 5px 7px;
+  background: #e8e2da;
+  border: 1px solid #bbb;
+  border-bottom: none;
+  border-radius: 3px 3px 0 0;
+}
+
+.wiki-toolbar-btn {
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 3px;
+  color: #333;
+  cursor: pointer;
+  font-size: 0.85rem;
+  min-width: 26px;
+  height: 26px;
+  padding: 0 5px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.1s;
+  font-family: inherit;
+}
+
+.wiki-toolbar-btn:hover {
+  background: #d0c8be;
+  border-color: #aaa;
+  color: #111;
+}
+
+.wiki-toolbar-btn b { font-weight: 900; }
+.wiki-toolbar-btn i { font-style: italic; font-family: serif; }
+.wiki-toolbar-btn u { text-decoration: underline; }
+.wiki-toolbar-btn s { text-decoration: line-through; }
+
+/* Unicode icon spans used in toolbar buttons */
+.wiki-tb-icon {
+  font-style: normal;
+  font-weight: 600;
+  font-family: "Segoe UI", "Arial Unicode MS", sans-serif;
+  font-size: 0.82rem;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  pointer-events: none;
+}
+
+.wiki-toolbar-sep {
+  width: 1px;
+  height: 20px;
+  background: #bbb;
+  margin: 0 3px;
+}
+
+/* Slightly smaller text for multi-char format labels (H2, H3, </>) */
+.wiki-tb-fmt {
+  font-size: 0.72rem;
+  letter-spacing: 0;
+}
+
+/* ── Contenteditable editor area ─────────────────────────────────────── */
+
+.wiki-rich-editor {
+  flex: 1;
+  min-height: 0;    /* shrinks with the window instead of overflowing */
+  overflow-y: auto;
+  padding: 10px 14px;
+  background: #f5f0eb;
+  border: 1px solid #bbb;
+  border-radius: 0 0 3px 3px;
+  color: #1a1a1a;
+  font-family: "Palatino Linotype", Palatino, "Book Antiqua", serif;
+  font-size: 0.95rem;
+  line-height: 1.75;
+  outline: none;
+}
+
+.wiki-rich-editor:focus {
+  border-color: #8b1a1a;
+  box-shadow: 0 0 0 1px #8b1a1a inset;
+}
+
+.wiki-rich-editor h2,
+.wiki-rich-editor h3,
+.wiki-rich-editor h4 { margin: 0.6em 0 0.3em; color: #2a1a1a; }
+.wiki-rich-editor p   { margin: 0 0 0.6em; }
+.wiki-rich-editor ul,
+.wiki-rich-editor ol  { padding-left: 1.4em; margin: 0 0 0.6em; }
+.wiki-rich-editor blockquote {
+  border-left: 3px solid #8b1a1a;
+  margin: 6px 0;
+  padding: 4px 12px;
+  color: #555;
+  font-style: italic;
+}
+.wiki-rich-editor pre {
+  background: #e8e2da;
+  border-radius: 3px;
+  padding: 6px 10px;
+  font-size: 0.85rem;
+  font-family: monospace;
+  white-space: pre-wrap;
+}
+
+/* ── Editor footer ───────────────────────────────────────────────────── */
+
+.wiki-editor-footer {
+  flex-shrink: 0; /* never compressed — save button is always visible */
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid #444;
+}
+
+.wiki-editor-hint {
+  font-size: 0.72rem;
+  color: #777;
+}
+
+.wiki-editor-hint kbd {
+  background: #3a3a3a;
+  border: 1px solid #555;
+  border-radius: 3px;
+  padding: 1px 5px;
+  font-size: 0.7rem;
+  color: #ccc;
+  font-family: monospace;
+}
+
+.wiki-btn-save {
+  background: #1a0808;
+  border: 1px solid #8b1a1a;
+  border-radius: 3px;
+  color: #e74c3c;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.9rem;
+  padding: 7px 22px;
+  transition: all 0.15s;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.wiki-btn-save:hover {
+  background: #250a0a;
+  border-color: #c0392b;
+  color: #ff6b6b;
+}
+
+/* ── Scrollbars ──────────────────────────────────────────────────────── */
+
+.wiki-entry-list::-webkit-scrollbar,
+.wiki-content::-webkit-scrollbar {
+  width: 4px;
+}
+
+.wiki-entry-list::-webkit-scrollbar-track,
+.wiki-content::-webkit-scrollbar-track {
+  background: #0a0a0a;
+}
+
+.wiki-entry-list::-webkit-scrollbar-thumb,
+.wiki-content::-webkit-scrollbar-thumb {
+  background: #8b1a1a;
+  border-radius: 2px;
+}
+
+.wiki-entry-list::-webkit-scrollbar-thumb:hover,
+.wiki-content::-webkit-scrollbar-thumb:hover {
+  background: #c0392b;
+}
+
+/* ── Entry Links ─────────────────────────────────────────────────────── */
+
+/* Clickable [[Entry Title]] cross-reference links rendered in entry body */
+.wiki-entry-link {
+  color: #c0392b;
+  text-decoration: none;
+  border-bottom: 1px solid #8b1a1a;
+  cursor: pointer;
+  transition: color 0.12s, border-color 0.12s;
+}
+
+.wiki-entry-link:hover {
+  color: #e74c3c;
+  border-bottom-color: #c0392b;
+}
+
+/* Broken link — target entry not found */
+.wiki-entry-link-missing {
+  color: #666;
+  border-bottom: 1px dashed #555;
+  cursor: help;
+}
+
+.wiki-entry-link-missing:hover {
+  color: #888;
+}
+
+/* ── GM Notes (viewer) ───────────────────────────────────────────────── */
+
+.wiki-gm-notes-section {
+  margin-top: 28px;
+  border: 1px solid #3a1a1a;
+  border-left: 3px solid #8b1a1a;
+  border-radius: 3px;
+  background: #0f0608;
+  overflow: hidden;
+}
+
+.wiki-gm-notes-header {
+  padding: 7px 14px;
+  background: #160a0a;
+  color: #8b1a1a;
+  font-size: 0.78rem;
+  font-weight: bold;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  border-bottom: 1px solid #2a1010;
+}
+
+.wiki-gm-notes-hint {
+  font-weight: normal;
+  text-transform: none;
+  letter-spacing: 0;
+  color: #5a2a2a;
+  font-size: 0.72rem;
+}
+
+.wiki-gm-notes-body {
+  padding: 10px 14px;
+  font-size: 0.9rem;
+  color: #aa6666;
+  line-height: 1.65;
+  white-space: pre-wrap;
+}
+
+/* ── GM Notes (editor) ───────────────────────────────────────────────── */
+
+.wiki-gm-notes-group {
+  margin-top: 4px;
+  border-top: 1px solid #444;
+  padding-top: 10px;
+}
+
+.wiki-gm-notes-group label {
+  /* Inherits the same colour, weight, case and spacing as Title/Category/Content */
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.wiki-gm-notes-label {
+  font-weight: normal;
+  text-transform: none;
+  letter-spacing: 0;
+  color: #5a2a2a;
+  font-size: 0.72rem;
+}
+
+.wiki-gm-notes-input {
+  background: #1a0808 !important;
+  border: 1px solid #3a1a1a !important;
+  border-radius: 3px;
+  color: #aa6666 !important;
+  font-family: inherit;
+  font-size: 0.88rem;
+  line-height: 1.55;
+  padding: 7px 10px;
+  resize: vertical;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.wiki-gm-notes-input:focus {
+  outline: none;
+  border-color: #8b1a1a !important;
+  box-shadow: 0 0 0 1px #5a1a1a inset;
+}
+
+/* ── Comments ────────────────────────────────────────────────────────── */
+
+.wiki-comments-section {
+  margin-top: 28px;
+  border-top: 1px solid #2e2e2e;
+  padding-top: 18px;
+}
+
+.wiki-comments-header {
+  font-size: 0.82rem;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.wiki-comments-count {
+  background: #1e1e1e;
+  border: 1px solid #2e2e2e;
+  border-radius: 8px;
+  color: #555;
+  font-size: 0.7rem;
+  min-width: 18px;
+  height: 16px;
+  padding: 0 5px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.wiki-comments-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.wiki-comment {
+  background: #1a1a1a;
+  border: 1px solid #2a2a2a;
+  border-radius: 3px;
+  padding: 9px 13px;
+}
+
+.wiki-comment-meta {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin-bottom: 5px;
+}
+
+.wiki-comment-author {
+  color: #c0392b;
+  font-size: 0.82rem;
+}
+
+.wiki-comment-time {
+  color: #444;
+  font-size: 0.72rem;
+  font-style: italic;
+  flex: 1; /* push delete button to the far right */
+}
+
+.wiki-comment-delete {
+  background: transparent;
+  border: none;
+  color: #3a3a3a;
+  cursor: pointer;
+  font-size: 0.72rem;
+  padding: 0 3px;
+  line-height: 1;
+  transition: color 0.12s;
+  flex-shrink: 0;
+}
+
+.wiki-comment-delete:hover {
+  color: #c0392b;
+}
+
+.wiki-comment-text {
+  color: #aaaaaa;
+  font-size: 0.88rem;
+  line-height: 1.55;
+  white-space: pre-wrap;
+}
+
+.wiki-comment-compose {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+}
+
+.wiki-comment-input {
+  flex: 1;
+  background: #1e1e1e;
+  border: 1px solid #333;
+  border-radius: 3px;
+  color: #e8e8e8;
+  font-family: inherit;
+  font-size: 0.88rem;
+  line-height: 1.5;
+  padding: 7px 10px;
+  resize: none;
+}
+
+.wiki-comment-input:focus {
+  outline: none;
+  border-color: #c0392b;
+  box-shadow: 0 0 0 1px #8b1a1a inset;
+}
+
+.wiki-comment-submit {
+  background: #1a0808;
+  border: 1px solid #8b1a1a;
+  border-radius: 3px;
+  color: #c0392b;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.82rem;
+  padding: 7px 14px;
+  transition: all 0.15s;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.wiki-comment-submit:hover {
+  background: #250a0a;
+  border-color: #c0392b;
+  color: #e74c3c;
+}
+
+/* ── No-GM Warning Banner ────────────────────────────────────────────── */
+
+.wiki-no-gm-banner {
+  margin: 4px 6px 8px;
+  padding: 7px 9px;
+  background: #1a1200;
+  border: 1px solid #7a5c00;
+  border-radius: 3px;
+  color: #c8960a;
+  font-size: 0.78rem;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  line-height: 1.3;
+}
+
+/* ── Body-Match Badge ────────────────────────────────────────────────── */
+
+/* "≡" badge shown when a search hit comes from the entry body, not the title */
+.wiki-body-match-badge {
+  font-size: 0.75rem;
+  color: #555;
+  background: #1a1a1a;
+  border: 1px solid #2e2e2e;
+  border-radius: 3px;
+  padding: 1px 4px;
+  line-height: 1.2;
+  flex-shrink: 0;
+  font-style: normal;
+  font-family: "Segoe UI", Arial, sans-serif;
+}
+
+.wiki-entry-item.selected .wiki-body-match-badge {
+  color: #8b4a1a;
+  background: #120808;
+  border-color: #3a1a0a;
+}
+
+/* ── Hidden Entries ──────────────────────────────────────────────────── */
+
+/* GMs see hidden entries at reduced opacity so they're distinguishable */
+.wiki-entry-item.hidden-entry {
+  opacity: 0.5;
+  font-style: italic;
+}
+
+.wiki-entry-item.hidden-entry:hover {
+  opacity: 0.8;
+}
+
+.wiki-entry-item.hidden-entry.selected {
+  opacity: 1;
+}
+
+/* Eye-slash icon in the sidebar entry list */
+.wiki-hidden-icon {
+  font-size: 0.72rem;
+  opacity: 0.75;
+  margin-right: 3px;
+  color: #666;
+}
+
+/* Eye-slash icon inline with the entry title in the main content area */
+.wiki-hidden-title-icon {
+  font-size: 1rem;
+  color: #666;
+  margin-right: 6px;
+  vertical-align: middle;
+}
+
+/* ── Entry Title Row (title + real-time hide toggle) ─────────────────── */
+
+.wiki-entry-title-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 5px;
+}
+
+.wiki-entry-title-row .wiki-entry-title {
+  flex: 1;
+  margin-bottom: 0;
+}
+
+/* Real-time hidden-toggle button (GM only, sits to the right of the title) */
+.wiki-btn-toggle-hidden {
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 1rem;
+  padding: 4px 6px;
+  flex-shrink: 0;
+  margin-top: 4px; /* optical alignment with title cap-height */
+  transition: all 0.15s;
+  line-height: 1;
+  color: #3a3a3a;
+}
+
+.wiki-btn-toggle-hidden:hover {
+  background: #1a0808;
+  border-color: #8b1a1a;
+  color: #c0392b;
+}
+
+/* Active state — entry is currently hidden */
+.wiki-btn-toggle-hidden.is-hidden {
+  color: #c0392b;
+  border-color: #5a1a1a;
+  background: #120808;
+}
+
+.wiki-btn-toggle-hidden.is-hidden:hover {
+  color: #e74c3c;
+  border-color: #8b1a1a;
+  background: #1a0808;
+}
+
+/* ── Hidden checkbox in the editor (GM only) ─────────────────────────── */
+
+.wiki-hidden-group {
+  margin-top: 4px;
+  border-top: 1px solid #444;
+  padding-top: 10px;
+}
+
+.wiki-hidden-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  color: #888;
+  font-size: 0.85rem;
+  font-weight: normal;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.wiki-hidden-label input[type="checkbox"] {
+  width: 15px;
+  height: 15px;
+  accent-color: #c0392b;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.wiki-hidden-label i {
+  color: #666;
+}
+
+.wiki-hidden-label:has(input:checked) {
+  color: #c0392b;
+}
+
+.wiki-hidden-label:has(input:checked) i {
+  color: #c0392b;
+}
+
+.wiki-hidden-hint {
+  font-size: 0.72rem;
+  color: #555;
+  font-style: italic;
+}

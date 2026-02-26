@@ -1,0 +1,201 @@
+{{!-- Adventurer Wiki – Main View --}}
+<div class="wiki-layout">
+
+  {{!-- Sidebar --}}
+  <div class="wiki-sidebar">
+
+    {{!-- Search --}}
+    <div class="wiki-search-wrap">
+      <i class="fas fa-search"></i>
+      <input class="wiki-search" type="text" placeholder="Search…" value="{{searchQuery}}">
+    </div>
+
+    {{!-- Category Tabs --}}
+    <nav class="wiki-cats">
+      {{#each categories}}
+      <button type="button"
+              class="wiki-cat-tab {{#if (eq this.id ../activeCat)}}active{{/if}}"
+              data-cat="{{this.id}}">
+        <span class="wiki-cat-tab-left">
+          <i class="fas {{this.icon}}"></i>
+          {{this.label}}
+        </span>
+        <span class="wiki-cat-count">{{this.count}}</span>
+      </button>
+      {{/each}}
+    </nav>
+
+    {{!-- Entry List --}}
+    <div class="wiki-entry-list">
+      {{#if noEntries}}
+        <p class="wiki-empty">No entries yet. Click <strong>New</strong> to add one.</p>
+      {{else}}
+        {{#each entries}}
+        <div class="wiki-entry-item {{#if (eq this.id ../current.id)}}selected{{/if}} {{#if this.pendingDelete}}pending-delete{{/if}} {{#if this.hidden}}hidden-entry{{/if}}"
+             data-id="{{this.id}}">
+          <span class="wiki-entry-item-title">
+            {{#if this.hidden}}<i class="fas fa-eye-slash wiki-hidden-icon" title="Hidden from players"></i> {{/if}}{{#if this.pendingDelete}}<i class="fas fa-flag wiki-pending-icon" title="Flagged for deletion"></i> {{/if}}{{this.title}}
+          </span>
+          <span class="wiki-entry-item-badges">
+            {{#if this.bodyMatch}}
+            <span class="wiki-body-match-badge" title="Matched in entry text">≡</span>
+            {{/if}}
+            {{#if this.categoryLabel}}
+            <span class="wiki-entry-cat-badge">{{this.categoryLabel}}</span>
+            {{/if}}
+            {{#if this.beingEditedBy}}
+            <span class="wiki-editing-badge" title="Being edited by {{this.beingEditedBy}}">
+              <i class="fas fa-pencil"></i>
+            </span>
+            {{/if}}
+          </span>
+        </div>
+        {{/each}}
+      {{/if}}
+    </div>
+
+    {{!-- Action Buttons (all players can New/Edit; delete flow differs) --}}
+    <div class="wiki-sidebar-actions">
+
+      {{!-- Row 1: always visible --}}
+      <div class="wiki-actions-row">
+        <button class="wiki-btn-new"><i class="fas fa-plus"></i> New</button>
+        <button class="wiki-btn-edit" {{#unless current}}disabled{{/unless}}><i class="fas fa-edit"></i> Edit</button>
+      </div>
+
+      {{!-- Row 2: delete-related actions --}}
+      <div class="wiki-actions-row">
+        {{#if isGM}}
+          {{!-- GM: clear flag and/or permanently delete --}}
+          {{#if current.pendingDelete}}
+            <button class="wiki-btn-cancel-delete" title="Clear deletion flag"><i class="fas fa-undo"></i> Clear Flag</button>
+          {{/if}}
+          <button class="wiki-btn-delete" {{#unless current}}disabled{{/unless}}><i class="fas fa-trash"></i> Delete</button>
+        {{else}}
+          {{!-- Players: flag for deletion --}}
+          <button class="wiki-btn-request-delete"
+                  {{#unless current}}disabled{{/unless}}
+                  {{#if current.pendingDelete}}disabled{{/if}}
+                  title="{{#if current.pendingDelete}}Already flagged for deletion{{else}}Request deletion approval from GM{{/if}}">
+            <i class="fas fa-flag"></i> Flag for Deletion
+          </button>
+        {{/if}}
+      </div>
+
+    </div>
+
+    {{!-- GM-only: pending deletion notice --}}
+    {{#if isGM}}
+      {{#if pendingDeletions}}
+      <div class="wiki-pending-banner">
+        <i class="fas fa-exclamation-triangle"></i>
+        {{pendingDeletions}} entr{{#if (eq pendingDeletions 1)}}y{{else}}ies{{/if}} flagged for deletion
+      </div>
+      {{/if}}
+    {{/if}}
+
+    {{!-- Player warning: no GM connected, saves are blocked --}}
+    {{#unless isGM}}
+      {{#unless gmOnline}}
+      <div class="wiki-no-gm-banner">
+        <i class="fas fa-exclamation-triangle"></i>
+        No GM connected — saving is disabled until a GM joins.
+      </div>
+      {{/unless}}
+    {{/unless}}
+
+  </div>
+
+  {{!-- Main Content --}}
+  <div class="wiki-content">
+    {{#if current}}
+      <div class="wiki-entry-header">
+        <div class="wiki-entry-title-row">
+          <h2 class="wiki-entry-title {{#if current.pendingDelete}}pending-delete-title{{/if}}">
+            {{#if current.hidden}}<i class="fas fa-eye-slash wiki-hidden-title-icon" title="Hidden from players"></i> {{/if}}{{#if current.pendingDelete}}<i class="fas fa-flag"></i> {{/if}}{{current.title}}
+          </h2>
+          {{#if isGM}}
+          <button type="button"
+                  class="wiki-btn-toggle-hidden {{#if current.hidden}}is-hidden{{/if}}"
+                  title="{{#if current.hidden}}Hidden from players — click to show{{else}}Visible to players — click to hide{{/if}}">
+            <i class="fas {{#if current.hidden}}fa-eye-slash{{else}}fa-eye{{/if}}"></i>
+          </button>
+          {{/if}}
+        </div>
+        {{#if current.updatedBy}}
+        <span class="wiki-entry-meta">
+          Last edited by <strong>{{current.updatedBy}}</strong>{{#if updatedAtFormatted}} &mdash; {{updatedAtFormatted}}{{/if}}
+        </span>
+        {{/if}}
+      </div>
+      {{#if currentEditor}}
+      <div class="wiki-editing-notice">
+        <i class="fas fa-pencil"></i>
+        <strong>{{currentEditor}}</strong> is currently editing this entry.
+      </div>
+      {{/if}}
+      {{#if current.pendingDelete}}
+      <div class="wiki-delete-notice">
+        <i class="fas fa-exclamation-triangle"></i>
+        This entry has been flagged for deletion and is awaiting GM approval.
+      </div>
+      {{/if}}
+      <div class="wiki-entry-body">
+        {{{enrichedContent}}}
+      </div>
+
+      {{!-- GM-only private notes --}}
+      {{#if isGM}}
+        {{#if gmNotes}}
+        <div class="wiki-gm-notes-section">
+          <div class="wiki-gm-notes-header">
+            <i class="fas fa-lock"></i> GM Notes <span class="wiki-gm-notes-hint">(only you can see this)</span>
+          </div>
+          <div class="wiki-gm-notes-body">{{gmNotes}}</div>
+        </div>
+        {{/if}}
+      {{/if}}
+
+      {{!-- Comments --}}
+      {{#if current}}
+      <div class="wiki-comments-section">
+        <div class="wiki-comments-header">
+          <i class="fas fa-comments"></i> Comments
+          {{#if hasComments}}<span class="wiki-comments-count">{{formattedComments.length}}</span>{{/if}}
+        </div>
+
+        {{#if hasComments}}
+        <div class="wiki-comments-list">
+          {{#each formattedComments}}
+          <div class="wiki-comment">
+            <div class="wiki-comment-meta">
+              <strong class="wiki-comment-author">{{this.authorName}}</strong>
+              <span class="wiki-comment-time">{{this.createdAtFormatted}}</span>
+              {{#if this.canDelete}}
+              <button type="button" class="wiki-comment-delete" data-comment-id="{{this.id}}" title="Delete comment">
+                <i class="fas fa-times"></i>
+              </button>
+              {{/if}}
+            </div>
+            <div class="wiki-comment-text">{{this.text}}</div>
+          </div>
+          {{/each}}
+        </div>
+        {{/if}}
+
+        <div class="wiki-comment-compose">
+          <textarea class="wiki-comment-input" placeholder="Add a comment… (Ctrl+Enter to post)" rows="2"></textarea>
+          <button type="button" class="wiki-comment-submit"><i class="fas fa-paper-plane"></i> Post</button>
+        </div>
+      </div>
+      {{/if}}
+
+    {{else}}
+      <div class="wiki-placeholder">
+        <i class="fas fa-book-open"></i>
+        <p>Select an entry to read it.</p>
+      </div>
+    {{/if}}
+  </div>
+
+</div>

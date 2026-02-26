@@ -1,0 +1,76 @@
+{{!-- Adventurer Wiki – Entry Editor --}}
+<form autocomplete="off">
+
+  <div class="form-group">
+    <label>Title</label>
+    <input type="text" name="title" value="{{entry.title}}" placeholder="Entry title…" required>
+  </div>
+
+  <div class="form-group">
+    <label>Category</label>
+    <select name="category">
+      {{#each categories}}
+      <option value="{{this.id}}" {{#if (eq this.id ../entry.category)}}selected{{/if}}>
+        {{this.label}}
+      </option>
+      {{/each}}
+    </select>
+  </div>
+
+  <div class="form-group editor-wrap">
+    <label>Content</label>
+
+    {{!-- Formatting toolbar --}}
+    <div class="wiki-toolbar">
+      <button type="button" class="wiki-toolbar-btn" data-cmd="bold"          title="Bold (Ctrl+B)">        <b>B</b></button>
+      <button type="button" class="wiki-toolbar-btn" data-cmd="italic"        title="Italic (Ctrl+I)">      <i>I</i></button>
+      <button type="button" class="wiki-toolbar-btn" data-cmd="underline"     title="Underline (Ctrl+U)">   <u>U</u></button>
+      <button type="button" class="wiki-toolbar-btn" data-cmd="strikeThrough" title="Strikethrough">        <s>S</s></button>
+      <span class="wiki-toolbar-sep"></span>
+      <button type="button" class="wiki-toolbar-btn" data-cmd="insertUnorderedList" title="Bullet list">   <span class="wiki-tb-icon">•≡</span></button>
+      <button type="button" class="wiki-toolbar-btn" data-cmd="insertOrderedList"   title="Numbered list"> <span class="wiki-tb-icon">1.≡</span></button>
+      <button type="button" class="wiki-toolbar-btn" data-cmd="indent"        title="Indent">               <span class="wiki-tb-icon">⇥</span></button>
+      <button type="button" class="wiki-toolbar-btn" data-cmd="outdent"       title="Outdent">              <span class="wiki-tb-icon">⇤</span></button>
+      <button type="button" class="wiki-toolbar-btn" data-cmd="removeFormat"  title="Clear formatting">     <span class="wiki-tb-icon">✕</span></button>
+      <span class="wiki-toolbar-sep"></span>
+      <button type="button" class="wiki-toolbar-btn" data-cmd="formatBlock" data-value="p"          title="Paragraph">        <span class="wiki-tb-icon">¶</span></button>
+      <button type="button" class="wiki-toolbar-btn" data-cmd="formatBlock" data-value="h2"         title="Heading 2">        <span class="wiki-tb-icon wiki-tb-fmt">H2</span></button>
+      <button type="button" class="wiki-toolbar-btn" data-cmd="formatBlock" data-value="h3"         title="Heading 3">        <span class="wiki-tb-icon wiki-tb-fmt">H3</span></button>
+      <button type="button" class="wiki-toolbar-btn" data-cmd="formatBlock" data-value="h4"         title="Heading 4">        <span class="wiki-tb-icon wiki-tb-fmt">H4</span></button>
+      <button type="button" class="wiki-toolbar-btn" data-cmd="formatBlock" data-value="blockquote" title="Blockquote">       <span class="wiki-tb-icon">❝</span></button>
+      <button type="button" class="wiki-toolbar-btn" data-cmd="formatBlock" data-value="pre"        title="Code block">       <span class="wiki-tb-icon wiki-tb-fmt">&lt;/&gt;</span></button>
+      <span class="wiki-toolbar-sep"></span>
+      <button type="button" class="wiki-toolbar-btn wiki-toolbar-btn-link" title="Insert entry link — [[Entry Title]]"><span class="wiki-tb-icon">[[]]</span></button>
+    </div>
+
+    {{!-- Contenteditable rich-text area --}}
+    <div class="wiki-rich-editor" contenteditable="true" spellcheck="true"></div>
+
+    {{!-- Hidden textarea carries the value on form submit (populated by JS) --}}
+    <textarea name="content" hidden></textarea>
+  </div>
+
+  {{#if isGM}}
+  <div class="form-group wiki-gm-notes-group">
+    <label><i class="fas fa-lock"></i> GM Notes <span class="wiki-gm-notes-label">(private — players cannot see this)</span></label>
+    <textarea class="wiki-gm-notes-input" name="gmNotes" placeholder="Private notes visible only to the GM…" rows="3"></textarea>
+  </div>
+  <div class="form-group wiki-hidden-group">
+    <label class="wiki-hidden-label">
+      <input type="checkbox" class="wiki-hidden-checkbox">
+      <i class="fas fa-eye-slash"></i>
+      Hide from players
+      <span class="wiki-hidden-hint">(entry will not appear in players' wiki)</span>
+    </label>
+  </div>
+  {{/if}}
+
+  <div class="wiki-editor-footer">
+    <span class="wiki-editor-hint"><kbd>Ctrl+Enter</kbd> to save</span>
+    <button type="button" class="wiki-btn-save">
+      <i class="fas fa-save"></i>
+      {{#if isNew}}Create Entry{{else}}Save Changes{{/if}}
+    </button>
+  </div>
+
+</form>
