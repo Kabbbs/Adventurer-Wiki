@@ -1,0 +1,55 @@
+{{!-- FILE: adventurer-wiki/templates/doodle-editor.html --}}
+{{!-- Adventurer Wiki – Doodle Editor --}}
+<div class="wiki-doodle-wrap">
+
+  <div class="wiki-doodle-toolbar">
+
+    {{!-- Tool selection --}}
+    <button type="button" class="wiki-doodle-tool-btn wiki-doodle-pen active" title="Pen tool">
+      <i class="fas fa-pen"></i> Pen
+    </button>
+    <button type="button" class="wiki-doodle-tool-btn wiki-doodle-eraser" title="Eraser tool">
+      <i class="fas fa-eraser"></i> Eraser
+    </button>
+
+    <span class="wiki-doodle-sep"></span>
+
+    {{!-- Color picker --}}
+    <label class="wiki-doodle-control-label" title="Stroke color">
+      <i class="fas fa-palette"></i>
+      <input type="color" class="wiki-doodle-color" value="#1a1a1a">
+    </label>
+
+    {{!-- Stroke size --}}
+    <label class="wiki-doodle-control-label wiki-doodle-size-wrap" title="Stroke size">
+      <i class="fas fa-circle wiki-doodle-size-icon-sm"></i>
+      <input type="range" class="wiki-doodle-size" min="1" max="30" value="4">
+      <i class="fas fa-circle wiki-doodle-size-icon-lg"></i>
+    </label>
+
+    <span class="wiki-doodle-sep"></span>
+
+    {{!-- Clear --}}
+    <button type="button" class="wiki-doodle-clear" title="Clear the canvas">
+      <i class="fas fa-trash-alt"></i> Clear
+    </button>
+
+    {{!-- Spacer pushes Insert/Cancel to the right --}}
+    <div class="wiki-doodle-spacer"></div>
+
+    <button type="button" class="wiki-doodle-cancel">Cancel</button>
+    <button type="button" class="wiki-doodle-insert">
+      <i class="fas fa-check"></i> Insert Doodle
+    </button>
+
+  </div>
+
+  {{!-- Drawing canvas —  width/height set here define the internal resolution (800×400).
+       CSS makes it fill the window width responsively. --}}
+  <div class="wiki-doodle-canvas-wrap">
+    <canvas class="wiki-doodle-canvas" width="800" height="400"></canvas>
+  </div>
+
+  <p class="wiki-doodle-hint">Draw on the canvas above, then click <strong>Insert Doodle</strong> to embed it in the entry.</p>
+
+</div>

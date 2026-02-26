@@ -1,25 +1,33 @@
-{
-  "id": "adventurer-wiki",
-  "title": "Adventurer Wiki",
-  "description": "An in-game wiki all players can contribute to, with GM-controlled deletion approval.",
-  "version": "1.4.0",
-  "url": "https://github.com/Kabbbs/Adventurer-Wiki",
-  "readme": "https://github.com/Kabbbs/Adventurer-Wiki/blob/main/README.md",
-  "manifest": "https://raw.githubusercontent.com/Kabbbs/Adventurer-Wiki/main/adventurer-wiki/module.json",
-  "download": "https://github.com/Kabbbs/Adventurer-Wiki/releases/download/v1.4.0/adventurer-wiki-v1.4.0.zip",
-  "compatibility": {
-    "minimum": "13",
-    "verified": "13"
-  },
-  "authors": [
-    {
-      "name": "Kabs",
-      "url": "https://github.com/Kabbbs"
-    }
-  ],
-  "esmodules": ["scripts/party-wiki.js"],
-  "styles": ["styles/party-wiki.css"],
-  "socket": true,
-  "languages": [],
-  "flags": {}
+﻿{
+    "id":  "adventurer-wiki",
+    "title":  "Adventurer Wiki",
+    "description":  "An in-game wiki all players can contribute to, with GM-controlled deletion approval.",
+    "version":  "1.5.0",
+    "url":  "https://github.com/Kabbbs/Adventurer-Wiki",
+    "readme":  "https://github.com/Kabbbs/Adventurer-Wiki/blob/main/README.md",
+    "manifest":  "https://raw.githubusercontent.com/Kabbbs/Adventurer-Wiki/main/adventurer-wiki/module.json",
+    "download":  "https://github.com/Kabbbs/Adventurer-Wiki/releases/download/v1.4.0/adventurer-wiki-v1.4.0.zip",
+    "compatibility":  {
+                          "minimum":  "13",
+                          "verified":  "13"
+                      },
+    "authors":  [
+                    {
+                        "name":  "Kabs",
+                        "url":  "https://github.com/Kabbbs"
+                    }
+                ],
+    "esmodules":  [
+                      "scripts/party-wiki.js"
+                  ],
+    "styles":  [
+                   "styles/party-wiki.css"
+               ],
+    "socket":  true,
+    "languages":  [
+
+                  ],
+    "flags":  {
+
+              }
 }

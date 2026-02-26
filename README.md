@@ -32,6 +32,8 @@ https://raw.githubusercontent.com/Kabbbs/Adventurer-Wiki/main/adventurer-wiki/mo
 - 🔒 **Soft-lock indicators** — shows when another user is editing an entry
 - 📝 **GM Notes** — private per-entry notes visible only to the GM
 - 🔄 **Real-time sync** — all changes propagate live to every connected client
+- 🖼️ **Image upload** — insert images from the Foundry file picker directly into entries; stored locally on the Foundry server
+- 🎨 **Doodle editor** — draw freehand sketches in a canvas window and embed them inline; saved as PNG to the world's data folder
 
 ---
 

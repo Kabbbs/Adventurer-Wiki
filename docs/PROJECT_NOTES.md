@@ -1,5 +1,5 @@
 # Adventurer Wiki — Project Notes
-_Last updated: February 2026_
+_Last updated: February 2026 · v1.5.0_
 
 ---
 
@@ -22,7 +22,8 @@ adventurer-wiki/
 │   └── party-wiki.css         ← All styles
 └── templates/
     ├── wiki.html              ← Main wiki viewer (Handlebars)
-    └── editor.html            ← Entry editor window (Handlebars)
+    ├── editor.html            ← Entry editor window (Handlebars)
+    └── doodle-editor.html     ← Freehand doodle canvas window (Handlebars) [v1.5.0]
 ```
 
 > ⚠️ **Critical note on filenames:** The working files are named `party-wiki.js` and `party-wiki.css`. The `module.json` references these. If `module.json` ever reverts to pointing at `adventurer-wiki.js`, the module will load silently broken.
@@ -140,6 +141,9 @@ const CATEGORIES = [
 | Timestamp + "last edited by" | ✅ Working | Displayed in entry header |
 | Hidden entries (GM toggle) | ✅ Working | See details below |
 | `bringToFront` compat | ✅ Fixed | Uses `bringToFront ?? bringToTop` |
+| Image upload via FilePicker | ✅ Working [v1.5.0] | Toolbar button; respects `FILES_UPLOAD` permission |
+| Doodle (hand-drawn) insert | ✅ Working [v1.5.0] | `WikiDoodleEditor` class; saves PNG to world data folder |
+| Responsive image display | ✅ Working [v1.5.0] | `max-width: 100%; height: auto` in viewer and editor |
 
 ---
 
@@ -203,6 +207,42 @@ new AdventurerWikiApp().render(true);
 
 ---
 
+## Image Upload & Doodle Editor (v1.5.0)
+
+### Image Upload
+
+A toolbar button (`IMG`) opens Foundry's native `FilePicker` set to `type: "image"`. The user can browse any path in the Foundry data folder or upload a new file from their system. On selection, the image path is inserted at the cursor via `document.execCommand("insertHTML", ...)` as:
+
+```html
+<img src="path/to/image.ext" class="wiki-inserted-image" alt="">
+```
+
+**Permission check:** `game.user.can("FILES_UPLOAD")` is tested before opening the picker. If the user lacks permission, a `ui.notifications.warn()` explains they need the GM to enable "Upload Files" in world settings.
+
+**Cursor preservation:** The selection range is captured with `window.getSelection().getRangeAt(0).cloneRange()` in the `mousedown` handler (before the FilePicker steals focus), then restored in the callback before inserting.
+
+### Doodle Editor (`WikiDoodleEditor`)
+
+A new `ApplicationV2` class. Opens as a floating window (default 860×560, resizable) with:
+
+- HTML5 `<canvas>` at **800×400** internal resolution (scales responsively via CSS `max-width: 100%; aspect-ratio: 2/1`)
+- Tools: **Pen** and **Eraser** (eraser uses `globalCompositeOperation: "destination-out"`)
+- Controls: color picker, stroke size range slider, clear button
+- Touch support (`touchstart`, `touchmove`, `touchend`)
+
+**On "Insert Doodle":**
+1. Check `game.user.can("FILES_UPLOAD")` again
+2. Create directory hierarchy if needed: `worlds/{worldId}/adventurer-wiki/` → `worlds/{worldId}/adventurer-wiki/images/` (each level separately — Foundry won't create intermediate directories in one call)
+3. Composite canvas onto a white background (`destination-out` strokes become white in the export)
+4. `canvas.toBlob()` → `File` → `FilePicker.upload("data", folderPath, file, {})`
+5. Insert `<img src="{result.path}" class="wiki-inserted-image" alt="doodle">` into the parent `WikiEntryEditor`'s `.wiki-rich-editor` div
+
+**Storage:** Doodles are saved to disk as `doodle_{timestamp}_{random}.png`. Files are **never deleted automatically** — they persist even if the entry is removed. This is intentional.
+
+**Icon note:** Toolbar buttons use `<span class="wiki-tb-icon">` with unicode characters (`IMG`, `✏`) rather than FontAwesome, which may not be loaded on all clients.
+
+---
+
 ## Known Issues / Limitations
 
 1. **`document.execCommand` deprecation:** Works in Foundry's current Electron shell. If it ever breaks, migrate to ProseMirror (ships with Foundry, no extra dependencies).
@@ -216,3 +256,7 @@ new AdventurerWikiApp().render(true);
 5. **No player feedback on `pendingDelete` cleared:** When a GM clears a deletion flag without deleting, the player gets no notification — the flag just silently disappears on re-render. A socket-broadcast `ui.notifications.info()` to the flagging player would be the right fix.
 
 6. **No comment editing:** Posted comments can only be deleted and reposted, not edited. No character limit currently enforced (a soft cap of ~1000–2000 chars in `_submitComment` would be sensible).
+
+7. **Orphaned doodle/image files:** Deleting an entry that contains embedded images does not remove the source files from the world data folder. This is intentional (prevents accidental deletion), but world GMs should manually prune `worlds/{worldId}/adventurer-wiki/images/` if disk space becomes a concern.
+
+8. **`document.execCommand("insertHTML")` used for image insertion:** Same deprecation caveat as the rest of the editor. Works in Foundry's current Electron shell; if it breaks, replace with direct DOM `Range.insertNode()` manipulation.
