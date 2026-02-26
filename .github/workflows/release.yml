@@ -1,0 +1,88 @@
+name: Build and Release
+
+# Triggers on any version tag: v1.0.0, v2.3.1, v10.0.0, etc.
+on:
+  push:
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+'
+
+# Needs write access to commit module.json back and create releases
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Package and publish
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v4
+        with:
+          # Check out main (not the tag) so we can commit module.json back
+          ref: main
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract version info from tag
+        id: tag
+        run: |
+          TAG="${GITHUB_REF#refs/tags/}"          # e.g. v1.5.0
+          VERSION="${TAG#v}"                       # e.g. 1.5.0
+          REPO="${{ github.repository }}"
+          ZIP_NAME="adventurer-wiki-${TAG}.zip"
+          DOWNLOAD_URL="https://github.com/${REPO}/releases/download/${TAG}/${ZIP_NAME}"
+
+          echo "tag=$TAG"               >> $GITHUB_OUTPUT
+          echo "version=$VERSION"       >> $GITHUB_OUTPUT
+          echo "zip_name=$ZIP_NAME"     >> $GITHUB_OUTPUT
+          echo "download=$DOWNLOAD_URL" >> $GITHUB_OUTPUT
+
+          echo "Tag:      $TAG"
+          echo "Version:  $VERSION"
+          echo "Zip:      $ZIP_NAME"
+          echo "Download: $DOWNLOAD_URL"
+
+      - name: Update module.json (version + download URL, no BOM)
+        run: |
+          jq \
+            --arg v "${{ steps.tag.outputs.version }}" \
+            --arg d "${{ steps.tag.outputs.download }}" \
+            '.version = $v | .download = $d' \
+            adventurer-wiki/module.json \
+            > /tmp/module.json
+
+          # Validate the output is clean JSON before replacing
+          jq empty /tmp/module.json
+          mv /tmp/module.json adventurer-wiki/module.json
+
+          echo "module.json updated:"
+          cat adventurer-wiki/module.json
+
+      - name: Commit updated module.json to main
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add adventurer-wiki/module.json
+          # Only commit if there's actually a change (idempotent on re-runs)
+          git diff --staged --quiet \
+            && echo "module.json already up to date, skipping commit." \
+            || git commit -m "ci: update module.json for ${{ steps.tag.outputs.tag }}"
+          git push origin HEAD:main
+
+      - name: Build zip
+        run: |
+          ZIP="${{ steps.tag.outputs.zip_name }}"
+          zip -r "$ZIP" adventurer-wiki/
+          echo "Built: $ZIP ($(du -sh $ZIP | cut -f1))"
+
+      - name: Create GitHub Release and attach zip
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.tag.outputs.tag }}
+          name: "${{ steps.tag.outputs.tag }}"
+          files: "${{ steps.tag.outputs.zip_name }}"
+          draft: false
+          prerelease: false
+          # Leave body blank — add release notes manually on GitHub after if needed,
+          # or add a CHANGELOG.md lookup step here in the future.
+          generate_release_notes: false
