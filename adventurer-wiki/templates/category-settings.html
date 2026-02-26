@@ -1,0 +1,43 @@
+{{!-- Adventurer Wiki – Category Settings --}}
+<div class="wiki-cat-settings">
+
+  <p class="wiki-cat-settings-hint">
+    <i class="fas fa-info-circle"></i>
+    Changes apply to all players. Categories with existing entries cannot be deleted.
+    Icon names use Font Awesome 6 (e.g. <code>fa-dragon</code>, <code>fa-map</code>).
+  </p>
+
+  <div class="wiki-cat-list">
+    {{#each categories}}
+    <div class="wiki-cat-row" data-id="{{this.id}}">
+      <div class="wiki-cat-reorder">
+        <button type="button" class="wiki-cat-move-up"   data-cat-id="{{this.id}}" {{#if this.isFirst}}disabled{{/if}} title="Move up">  <i class="fas fa-chevron-up"></i></button>
+        <button type="button" class="wiki-cat-move-down" data-cat-id="{{this.id}}" {{#if this.isLast}}disabled{{/if}}  title="Move down"><i class="fas fa-chevron-down"></i></button>
+      </div>
+      <i class="fas {{this.icon}} wiki-cat-preview-icon"></i>
+      <input class="wiki-cat-label-input" type="text" value="{{this.label}}" data-cat-id="{{this.id}}" placeholder="Category name" maxlength="30">
+      <input class="wiki-cat-icon-input"  type="text" value="{{this.icon}}"  data-cat-id="{{this.id}}" placeholder="fa-icon-name">
+      <span class="wiki-cat-entry-count" title="{{this.count}} entries in this category">{{this.count}}</span>
+      <button type="button" class="wiki-cat-delete-btn" data-cat-id="{{this.id}}"
+        {{#if this.count}}disabled title="Cannot delete — {{this.count}} entries exist in this category"{{else}}title="Delete category"{{/if}}>
+        <i class="fas fa-trash"></i>
+      </button>
+    </div>
+    {{/each}}
+  </div>
+
+  <div class="wiki-cat-add-section">
+    <div class="wiki-cat-add-row">
+      <i class="fas fa-tag wiki-cat-preview-icon"></i>
+      <input class="wiki-cat-new-label" type="text" placeholder="New category name" maxlength="30">
+      <input class="wiki-cat-new-icon"  type="text" placeholder="fa-icon-name">
+      <button type="button" class="wiki-cat-add-btn" title="Add category"><i class="fas fa-plus"></i> Add</button>
+    </div>
+  </div>
+
+  <div class="wiki-cat-footer">
+    <button type="button" class="wiki-cat-cancel-btn"><i class="fas fa-times"></i> Cancel</button>
+    <button type="button" class="wiki-cat-save-btn"><i class="fas fa-save"></i> Save Changes</button>
+  </div>
+
+</div>
