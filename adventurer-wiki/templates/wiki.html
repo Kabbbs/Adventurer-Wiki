@@ -82,6 +82,12 @@
         {{/if}}
       </div>
 
+      {{#if isGM}}
+      <div class="wiki-actions-row wiki-settings-row">
+        <button class="wiki-btn-settings" title="Manage Categories"><i class="fas fa-gear"></i> Categories</button>
+      </div>
+      {{/if}}
+
     </div>
 
     {{!-- GM-only: pending deletion notice --}}
@@ -199,3 +205,4 @@
   </div>
 
 </div>
+
