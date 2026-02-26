@@ -139,7 +139,6 @@ const CATEGORIES = [
 | No-GM warning banner | ✅ Working | Shown to players when GM offline |
 | Timestamp + "last edited by" | ✅ Working | Displayed in entry header |
 | Hidden entries (GM toggle) | ✅ Working | See details below |
-| Bookmarks | ⏳ Planned | Next feature — see below |
 | `bringToFront` compat | ✅ Fixed | Uses `bringToFront ?? bringToTop` |
 
 ---
@@ -217,18 +216,3 @@ new AdventurerWikiApp().render(true);
 5. **No player feedback on `pendingDelete` cleared:** When a GM clears a deletion flag without deleting, the player gets no notification — the flag just silently disappears on re-render. A socket-broadcast `ui.notifications.info()` to the flagging player would be the right fix.
 
 6. **No comment editing:** Posted comments can only be deleted and reposted, not edited. No character limit currently enforced (a soft cap of ~1000–2000 chars in `_submitComment` would be sensible).
-
----
-
-## Bookmarks — Next Feature
-
-**Design (fully agreed upon):**
-- `localStorage` key: `adventurer-wiki-bm-{worldId}-{userId}` — per-user, per-world, private
-- **Star button** in the entry title header row (alongside the hidden toggle for GMs)
-- **Bookmarks tab** at the bottom of the category nav, visually identical to other tabs with a thin separator line above it
-- Uses `data-cat="__bookmarks__"` as a sentinel value in `_activeCat`
-- Clicking the tab filters the entry list to bookmarked entries with the cross-category label badge on each result
-- Star toggles immediately on click with no save prompt — just a re-render
-- Filter logic: `if (showingBookmarks) return bookmarkIds.includes(e.id);`
-
-**Why prior attempts failed:** Buttons inside `{{#if}}` blocks weren't receiving click events due to Foundry's event interception. This is now fixed via document-level capture delegation — the same fix proven working by the hidden toggle button.
