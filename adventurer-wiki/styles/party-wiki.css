@@ -1197,3 +1197,221 @@
   color: #555;
   font-style: italic;
 }
+
+
+
+/* ── Category Settings Window ───────────────────────────────────────────────────── */
+
+.party-wiki-settings .wiki-cat-settings {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 12px 16px 16px;
+  height: 100%;
+  box-sizing: border-box;
+  overflow-y: auto;
+}
+
+.wiki-cat-settings-hint {
+  font-size: 0.78rem;
+  color: #888;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.wiki-cat-settings-hint code {
+  background: rgba(0,0,0,0.15);
+  padding: 1px 4px;
+  border-radius: 3px;
+  font-size: 0.75rem;
+}
+
+.wiki-cat-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+  overflow-y: auto;
+}
+
+.wiki-cat-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 6px;
+  padding: 6px 10px;
+}
+
+.wiki-cat-reorder {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.wiki-cat-reorder button {
+  background: none;
+  border: none;
+  color: #aaa;
+  padding: 1px 4px;
+  cursor: pointer;
+  font-size: 0.7rem;
+  line-height: 1;
+}
+
+.wiki-cat-reorder button:hover:not([disabled]) { color: #fff; }
+.wiki-cat-reorder button[disabled] { opacity: 0.2; cursor: default; }
+
+.wiki-cat-preview-icon {
+  width: 18px;
+  text-align: center;
+  color: #c0a060;
+  font-size: 0.9rem;
+  flex-shrink: 0;
+}
+
+.wiki-cat-label-input {
+  flex: 2;
+  min-width: 0;
+  background: rgba(0,0,0,0.2);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 4px;
+  color: #eee;
+  padding: 4px 7px;
+  font-size: 0.85rem;
+}
+
+.wiki-cat-icon-input {
+  flex: 1.2;
+  min-width: 0;
+  background: rgba(0,0,0,0.2);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 4px;
+  color: #aaa;
+  padding: 4px 7px;
+  font-size: 0.78rem;
+  font-family: monospace;
+}
+
+.wiki-cat-entry-count {
+  font-size: 0.75rem;
+  color: #888;
+  min-width: 18px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.wiki-cat-delete-btn {
+  background: none;
+  border: 1px solid rgba(180,60,60,0.4);
+  border-radius: 4px;
+  color: #c0392b;
+  padding: 4px 8px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  flex-shrink: 0;
+  transition: background 0.15s;
+}
+
+.wiki-cat-delete-btn:hover:not([disabled]) { background: rgba(180,60,60,0.2); }
+.wiki-cat-delete-btn[disabled] { opacity: 0.3; cursor: default; }
+
+.wiki-cat-add-section {
+  border-top: 1px solid rgba(255,255,255,0.08);
+  padding-top: 10px;
+}
+
+.wiki-cat-add-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.wiki-cat-new-label {
+  flex: 2;
+  background: rgba(0,0,0,0.2);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 4px;
+  color: #eee;
+  padding: 5px 8px;
+  font-size: 0.85rem;
+}
+
+.wiki-cat-new-icon {
+  flex: 1.2;
+  background: rgba(0,0,0,0.2);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 4px;
+  color: #aaa;
+  padding: 5px 8px;
+  font-size: 0.78rem;
+  font-family: monospace;
+}
+
+.wiki-cat-add-btn {
+  background: rgba(40,100,40,0.3);
+  border: 1px solid rgba(60,160,60,0.4);
+  border-radius: 4px;
+  color: #8fbc8f;
+  padding: 5px 12px;
+  cursor: pointer;
+  font-size: 0.82rem;
+  white-space: nowrap;
+}
+
+.wiki-cat-add-btn:hover { background: rgba(40,100,40,0.5); }
+
+.wiki-cat-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  border-top: 1px solid rgba(255,255,255,0.08);
+  padding-top: 10px;
+}
+
+.wiki-cat-cancel-btn {
+  background: rgba(80,80,80,0.3);
+  border: 1px solid rgba(150,150,150,0.3);
+  border-radius: 5px;
+  color: #aaa;
+  padding: 6px 14px;
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+
+.wiki-cat-save-btn {
+  background: rgba(60,100,160,0.35);
+  border: 1px solid rgba(80,140,220,0.4);
+  border-radius: 5px;
+  color: #8ab4f8;
+  padding: 6px 16px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.wiki-cat-save-btn:hover { background: rgba(60,100,160,0.55); }
+
+.wiki-settings-row {
+  margin-top: 4px;
+  padding-top: 6px;
+  border-top: 1px solid rgba(255,255,255,0.07);
+}
+
+.wiki-btn-settings {
+  width: 100%;
+  background: rgba(80,80,80,0.2);
+  border: 1px solid rgba(180,180,180,0.2);
+  border-radius: 5px;
+  color: #aaa;
+  padding: 5px 10px;
+  cursor: pointer;
+  font-size: 0.82rem;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  justify-content: center;
+}
+
+.wiki-btn-settings:hover { background: rgba(80,80,80,0.4); color: #ccc; }
