@@ -7,7 +7,7 @@ _Last updated: February 2026_
 
 A Foundry VTT module called **Adventurer Wiki** (module ID: `adventurer-wiki`). It provides an in-game wiki window that all players can read and write to, with GM-controlled permissions for deletion and entry visibility. Real-time multi-client sync is handled via Foundry's socket system.
 
-**Installation:** Via manifest URL in Foundry's module manager (see README).
+**Distribution:** Hosted on GitHub. Install via manifest URL pointing to `adventurer-wiki/module.json` in this repo.
 
 ---
 
@@ -25,16 +25,16 @@ adventurer-wiki/
     └── editor.html            ← Entry editor window (Handlebars)
 ```
 
-> ⚠️ **Note on filenames:** The canonical files are `party-wiki.js` and `party-wiki.css`. An older stale pair named `adventurer-wiki.js` / `adventurer-wiki.css` previously existed but has been deleted. If `module.json` ever reverts to pointing at `adventurer-wiki.js`, the module will silently fail to load.
+> ⚠️ **Critical note on filenames:** The working files are named `party-wiki.js` and `party-wiki.css`. The `module.json` references these. If `module.json` ever reverts to pointing at `adventurer-wiki.js`, the module will load silently broken.
 
 ---
 
 ## Architecture Overview
 
 ### Framework
-- `ApplicationV2` + `HandlebarsApplicationMixin` — Foundry v13 API
+- `ApplicationV2` + `HandlebarsApplicationMixin` — Foundry v13+ API
 - Two application classes: `PartyWikiApp` (viewer) and `WikiEntryEditor` (editor)
-- Targets Foundry v13+
+- Targeting Foundry v13+
 
 ### Data Storage
 - All wiki entries stored in a single **world-scoped game setting**: `adventurer-wiki.wikiEntries`
@@ -66,7 +66,9 @@ document.addEventListener("keydown", _keydown, { capture: true });
 this._docListeners = { _click, _input, _keydown };
 ```
 
-Listeners are removed in `close()` via stored references in `this._docListeners`. The `_listenersReady` guard prevents duplicate registration across re-renders. **Do not revert this to `this.element.addEventListener` — it will break buttons that appear conditionally.**
+Listeners are removed in `close()` via stored references in `this._docListeners`. The `_listenersReady` guard prevents duplicate registration across re-renders.
+
+**⛔ Do not revert this to `this.element.addEventListener` — it will break buttons that appear conditionally.**
 
 ---
 
@@ -137,7 +139,7 @@ const CATEGORIES = [
 | No-GM warning banner | ✅ Working | Shown to players when GM offline |
 | Timestamp + "last edited by" | ✅ Working | Displayed in entry header |
 | Hidden entries (GM toggle) | ✅ Working | See details below |
-| Bookmarks | ❌ Removed | Planned for future re-implementation |
+| Bookmarks | ⏳ Planned | Next feature — see below |
 | `bringToFront` compat | ✅ Fixed | Uses `bringToFront ?? bringToTop` |
 
 ---
@@ -149,10 +151,9 @@ Hidden entries are completely invisible to non-GM players. The GM sees them dimm
 **Two ways to toggle:**
 
 1. **In the editor:** A "Hide from players" checkbox appears in the GM-only section (below GM Notes). It saves with the entry when the Save button is clicked.
-
 2. **In the viewer:** An eye/eye-slash icon button appears to the right of the entry title (GM only). Clicking it saves immediately — no editor needed.
 
-**Critical implementation note:** The hidden checkbox value is read via `element.checked`, NOT `FormData`. FormData omits unchecked checkboxes entirely, making it unreliable for boolean toggles. This was the root cause of the original broken implementation.
+**Critical implementation note:** The hidden checkbox value is read via `element.checked`, NOT `FormData`. FormData omits unchecked checkboxes entirely, making it unreliable for boolean toggles.
 
 ```js
 // CORRECT — reads DOM directly
@@ -169,10 +170,11 @@ When a player has a hidden entry selected and the GM hides it, the player's sele
 
 ## Rich-Text Editor Notes
 
-- Uses native `document.execCommand()` — deprecated by browsers but still functional in Electron (which Foundry runs in)
+- Uses native `document.execCommand()` — deprecated by browsers but still functional in Foundry's Electron shell
 - Content lives in a `contenteditable` div (`.wiki-rich-editor`); a hidden `<textarea name="content">` is a decoy for FormData and is never actually used — content is read from `editorDiv.innerHTML`
 - Heading buttons (H2/H3/H4) toggle: clicking an already-active heading reverts to a paragraph
 - `[[Entry Title]]` links are inserted as plain text and processed at render time by `processEntryLinks()`, which converts them to `<a class="wiki-entry-link" data-id="…">` tags
+- If `execCommand` ever breaks (Electron upgrade), replace with Foundry's built-in ProseMirror integration
 
 ---
 
@@ -202,32 +204,31 @@ new AdventurerWikiApp().render(true);
 
 ---
 
-## Known Issues / Things to Watch
+## Known Issues / Limitations
 
-1. **Bookmarks removed:** Bookmarks were partially implemented across multiple sessions but repeatedly failed to function reliably due to the Foundry event-interception issue described above. The feature was fully removed to start clean. The document-capture delegation fix is now proven to work (the hidden toggle button uses it successfully), so a future re-implementation should be straightforward.
+1. **`document.execCommand` deprecation:** Works in Foundry's current Electron shell. If it ever breaks, migrate to ProseMirror (ships with Foundry, no extra dependencies).
 
-2. **`document.execCommand` deprecation:** The rich-text editor uses `execCommand`, which is deprecated. It currently works in Foundry's Electron shell. If it ever breaks, the preferred replacement is Foundry's built-in ProseMirror integration.
+2. **No entry ordering / drag-to-sort:** Entries display in insertion order within each category. Indefinitely deferred.
 
-3. **No entry ordering / drag-to-sort:** Entries are displayed in insertion order within each category. Indefinitely deferred.
+3. **Single editor instance:** `WikiEntryEditor` uses a static `id: "party-wiki-editor"` — only one editor window open at a time. This is intentional; it pairs correctly with the soft-lock system.
 
-4. **Single editor instance:** The `WikiEntryEditor` uses a static `id: "party-wiki-editor"` — only one editor window open at a time. Intentional design choice.
+4. **Two-GM race condition:** Two GMs editing different entries simultaneously is an unprotected last-write-wins situation. Acceptable for typical party size.
 
-5. **Two-GM race condition:** Two GMs editing different entries simultaneously is an unprotected last-write-wins race. Acceptable known limitation for typical party sizes.
+5. **No player feedback on `pendingDelete` cleared:** When a GM clears a deletion flag without deleting, the player gets no notification — the flag just silently disappears on re-render. A socket-broadcast `ui.notifications.info()` to the flagging player would be the right fix.
 
-6. **No player notification on pendingDelete clear:** When a GM clears a player's deletion flag without deleting, the player gets no feedback — their flag icon just disappears on re-render. Known UX gap; fix via `ui.notifications.info()` broadcast to the flagging player via socket.
-
-7. **No comment character limit:** No length enforcement exists on comments. A soft cap of ~1000–2000 chars enforced in `_submitComment` would be sensible.
+6. **No comment editing:** Posted comments can only be deleted and reposted, not edited. No character limit currently enforced (a soft cap of ~1000–2000 chars in `_submitComment` would be sensible).
 
 ---
 
-## Where to Continue
+## Bookmarks — Next Feature
 
-The next planned feature is **Bookmarks** — a per-user, per-world list of starred entries stored in `localStorage`.
-
-**Spec:**
-- `localStorage` key: `adventurer-wiki-bm-{worldId}-{userId}`
-- Star button in the entry title header row (alongside the hidden toggle for GMs)
-- Bookmarks tab at the bottom of the category nav, visually identical to other tabs with a thin separator line above it, using `data-cat="__bookmarks__"` as a sentinel in `_activeCat`
-- Clicking the tab filters the entry list to bookmarked entries only, with the cross-category label badge on each result
+**Design (fully agreed upon):**
+- `localStorage` key: `adventurer-wiki-bm-{worldId}-{userId}` — per-user, per-world, private
+- **Star button** in the entry title header row (alongside the hidden toggle for GMs)
+- **Bookmarks tab** at the bottom of the category nav, visually identical to other tabs with a thin separator line above it
+- Uses `data-cat="__bookmarks__"` as a sentinel value in `_activeCat`
+- Clicking the tab filters the entry list to bookmarked entries with the cross-category label badge on each result
 - Star toggles immediately on click with no save prompt — just a re-render
-- Per-user only, private — no GM visibility into other users' bookmarks
+- Filter logic: `if (showingBookmarks) return bookmarkIds.includes(e.id);`
+
+**Why prior attempts failed:** Buttons inside `{{#if}}` blocks weren't receiving click events due to Foundry's event interception. This is now fixed via document-level capture delegation — the same fix proven working by the hidden toggle button.
